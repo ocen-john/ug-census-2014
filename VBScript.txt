@@ -1,0 +1,65 @@
+ColCnt = "P"
+
+RowCnt = 2
+Function getTableName(ColCnt)
+ varZoneName = "P" & ColCnt
+ return VarZoneName
+End Function
+Function getZoneName(ColCnt,RowCnt)
+ varZoneName = "P" & ColCnt & "Row" & Cnt
+ return VarZoneName
+End Function
+
+Function OpenConnectToDatabase()
+' Acquire Connection
+Dim objConnection
+Dim objRecordset
+Dim strSQLQuery
+Set objConnection = CreateObject("ADODB.Connection")
+objConnection.Provider = "MSDASQL"
+' MS ODBC Provider for OLE DB
+objConnection.ConnectionString = "Validation"
+'DSN for ODBC Database
+objConnection.Open
+return objConnection
+End Function
+
+Function CloseConnection(objConnection)
+' Terminate Connection
+objConnection.Close
+Set objConnection = Nothing
+End Function
+
+Sub CheckFields(objConnection, fieldName, TableName)
+' build the Query differently depending on OCR results of alpha or numeric
+If This.IsAlpha Then
+StrSQLQuery = "SELECT CODE FROM " & table & " WHERE CODE = '" & Zone(fieldName).Value & "'"
+Else
+StrSQLQuery = "SELECT CODE FROM " & table & " WHERE CODE = " & Zone(fieldName).Value
+End If
+' Run the SQL and get back a recordset
+Set objRecordset = objConnection.Execute(strSQLQuery)
+
+If Not objRecordset.EOF Then
+This.Value = objRecordset("CODE")
+' Get the written out month!
+Else
+ Zone(fieldName).Flagged = True
+ Zone(fieldName).CustomMessage = "Value out of Code List Range. Please correct"
+
+End If
+End Sub
+
+Connection = OpenConnectToDatabase()
+
+For RowCnt=0 To RowCnt<10
+	
+	For ColCnt = 6 To ColCnt < 18
+		ZoneName = getZoneName(ColCnt,RowCnt)
+		tableName = getTableName(ColCnt)
+		var = CheckFields(Connection, ZoneName, tableName)
+		ColCnt = ColCnt + 1
+	Next
+	RowCnt = RowCnt + 1
+Next 
+
